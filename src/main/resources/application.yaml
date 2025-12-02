@@ -1,0 +1,109 @@
+spring:
+  application:
+    name: ai-finance-tracker
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finance_tracker
+    username: finance_user
+    password: finance_pass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: finance-tracker-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.financetracker.event
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: gpt-4-turbo-preview
+          temperature: 0.7
+      embedding:
+        options:
+          model: text-embedding-3-small
+
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: mistral
+          temperature: 0.7
+
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536
+
+# Application-specific configuration
+finance:
+  ai:
+    default-provider: ollama  # Options: ollama, openai
+    fraud-detection:
+      enabled: true
+      threshold: 0.75
+    document-path: classpath:financial-documents/
+
+  kafka:
+    topics:
+      transaction-created: transaction.created
+      fraud-detected: fraud.detected
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.financetracker: DEBUG
+    org.springframework.ai: DEBUG
+    org.springframework.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Server configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
