@@ -91,7 +91,7 @@ public class TransactionCommandService {
             throw new InvalidTransactionException("Invalid transaction amount: " + request.amount());
         }
 
-        if (request.transactionDate().isAfter(LocalDateTime.now()))){
+        if (request.transactionDate().isAfter(LocalDateTime.now())) {
             throw new InvalidTransactionException("Invalid transaction date: " + request.transactionDate());
         }
     }
