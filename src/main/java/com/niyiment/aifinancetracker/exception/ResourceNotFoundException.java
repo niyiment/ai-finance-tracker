@@ -1,0 +1,7 @@
+package com.niyiment.aifinancetracker.exception;
+
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}

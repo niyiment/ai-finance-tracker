@@ -1,0 +1,7 @@
+package com.niyiment.aifinancetracker.exception;
+
+public class LlmProcessingException extends RuntimeException {
+    public LlmProcessingException(String message) {
+        super(message);
+    }
+}
